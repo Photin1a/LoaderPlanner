@@ -1,0 +1,20 @@
+loader:
+  L: 1.5
+  L1: 4.346
+  L2: 3.472
+  d: 0.92
+  d1: 1.323
+  d2: 1.332
+  width: 2.44
+
+  # kin_dynamic
+  min_velocity: -3
+  max_velocity: 3
+  min_acceleration: -2
+  max_acceleration: 2
+  min_gamma: -0.5235987666666 #-30度
+  max_gamma: 0.5235987666666
+  min_omega: -0.2
+  max_omega: 0.2
+  min_jerk: -3
+  max_jerk: 3

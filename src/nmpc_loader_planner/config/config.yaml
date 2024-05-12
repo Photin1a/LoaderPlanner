@@ -1,0 +1,14 @@
+nmpc_loader_planner:
+  optimizer:
+    t_resolution: 0.01
+    opti_w_kin: 1000
+    opti_w_ujerk: 1
+    opti_w_uomega: 1
+    opti_w_time: 1
+
+  corridor:
+    max_a_axis: 10
+    max_b_axis: 10
+    use_decomp_corridor: false
+    is_sparsity: false
+    sparsity_rate: 0.5

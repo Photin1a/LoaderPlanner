@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>nmpc_loader_planner</name>
+  <version>0.0.0</version>
+  <description>The nmpc_loader_planner package</description>
+  <maintainer email="photinia@todo.todo">photinia</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>tf</build_export_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <depend>decomp_ros_msgs</depend>
+  <depend>decomp_ros_utils</depend>
+  <depend>decomp_util</depend>
+
+  <export>
+  </export>
+</package>

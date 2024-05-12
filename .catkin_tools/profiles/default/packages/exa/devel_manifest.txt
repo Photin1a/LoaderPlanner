@@ -1,0 +1,5 @@
+exa
+/home/photinia/Documents/loader_ws/devel/.private/exa/cmake.lock /home/photinia/Documents/loader_ws/devel/./cmake.lock
+/home/photinia/Documents/loader_ws/devel/.private/exa/lib/pkgconfig/exa.pc /home/photinia/Documents/loader_ws/devel/lib/pkgconfig/exa.pc
+/home/photinia/Documents/loader_ws/devel/.private/exa/share/exa/cmake/exaConfig-version.cmake /home/photinia/Documents/loader_ws/devel/share/exa/cmake/exaConfig-version.cmake
+/home/photinia/Documents/loader_ws/devel/.private/exa/share/exa/cmake/exaConfig.cmake /home/photinia/Documents/loader_ws/devel/share/exa/cmake/exaConfig.cmake

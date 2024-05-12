@@ -1,0 +1,4 @@
+simple_move_base: 
+  initpose_topic_name: /initialpose
+  endpose_topic_name: /move_base_simple/goal
+  map_topic_name: /map
