@@ -48,9 +48,8 @@ sudo make install
 ## 2. Build from source
 Clone the respository, and build it. If the ros package cannot be found during compilation, use `sudo apt install -y ros-{your-ros}-{package}` to install it.
 ```bash
-mkdir loader_ws 
-cd loader_ws
 git clone https://github.com/Photin1a/LoaderPlanner.git
+cd LoaderPlanner
 catkin build
 source devel/setup.bash
 ```
