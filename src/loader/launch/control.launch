@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<launch>
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find loader)/config/loader_control_config.yaml" command="load"/>
+
+  <!-- load controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+        output="screen" ns="/loader" args="joint_state_controller lf_velocity_controller rf_velocity_controller lb_velocity_controller rb_velocity_controller back_steering_position_controller"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+      respawn="true" output="screen">
+      <remap from="/joint_states" to="/loader/joint_states" />
+  </node>
+</launch>

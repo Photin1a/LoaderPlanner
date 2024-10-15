@@ -10,7 +10,7 @@
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64",
-            "compileCommands": "compile_commands.json"
+            "compileCommands": "./build/nmpc_loader_planner/compile_commands.json"
         }
     ],
     "version": 4

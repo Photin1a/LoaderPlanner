@@ -7,7 +7,13 @@
         {
             "name": "ROS: Launch",
             "request": "launch",
-            "target": "/home/photinia/Documents/loader_ws/src/simple_move_base/launch/simple_move_base.launch",
+            "target": "/home/photinia/Documents/LoaderPlanner/LoaderPlanner-dev/src/simple_move_base/launch/simple_move_base.launch",
+            "launch": [
+                "rviz",
+                "gz",
+                "gzclient",
+                "gzserver"
+            ],
             "type": "ros"
         }
     ]

@@ -1,0 +1,37 @@
+loader:
+# controls the rear two tires based on individual motors
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50  
+  lf_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: lf_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  rf_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: rf_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  lb_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: lb_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  rb_velocity_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: rb_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  back_steering_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: back_joint
+    pid: {p: 100000000.0, i: 1000, d: 0}    
+
+  # gazebo_ros_control:
+  #   pid_gains:
+  #     rear_right_wheel_joint:
+  #       p: 100.0
+  #       i: 0.5
+  #       d: 0.0
+  #     rear_left_wheel_joint:
+  #       p: 100.0
+  #       i: 0.5
+  #       d: 0.0

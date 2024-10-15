@@ -79,18 +79,18 @@ public:
   double min_jerk_ = -3;
   double max_jerk_ = 3;
 
-  // optimizer
+  // optimizer, to config.yaml modify
   double t_resolution_ = 0.01; //采样周期
-  double opti_w_kin_ = 1000;
-  double opti_w_uj_ = 1;
-  double opti_w_uw_ = 1;
-  double opti_w_time_ = 1;
+  double opti_w_kin_ = 1;
+  double opti_w_uj_ = 0.001;
+  double opti_w_uw_ = 0.001;
+  double opti_w_time_ = 0.001;
   int N_ = 100; // 需要传入,待规划点数量，，，问题的维度   TODO
 
-  // corridor
+  // corridor, to config.yaml modify
   double max_a_axis_ = 20;
   double max_b_axis_ = 20;
-  bool use_decomp_corridor_ = false;
+  bool use_decomp_corridor_ = true;
   bool is_sparsity_ = false;
   double sparsity_rate_ = 0.5;
   std::vector<int> sparse_path_ids_; // unuse

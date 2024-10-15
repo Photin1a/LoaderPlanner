@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="loader" xmlns:xacro="http://ros.org/wiki/xacro">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.31933 4.4409E-16 6.9389E-18"
+        rpy="0 0 0" />
+      <mass
+        value="919.89" />
+      <inertia
+        ixx="196.21"
+        ixy="4.1078E-15"
+        ixz="-1.7091E-15"
+        iyy="183.61"
+        iyz="6.0184E-15"
+        izz="355.72" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="lf_Link">
+    <inertial>
+      <origin
+        xyz="0 3.4694E-18 -0.15004"
+        rpy="0 0 0" />
+      <mass
+        value="226.14" />
+      <inertia
+        ixx="16.397"
+        ixy="6.6731E-16"
+        ixz="6.5919E-17"
+        iyy="16.397"
+        iyz="-1.4686E-16"
+        izz="29.404" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/lf_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/lf_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lf_joint"
+    type="continuous">
+    <origin
+      xyz="0 1.05 0"
+      rpy="1.5708 0 -3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="lf_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit effort="1000000000" velocity="10000" />
+  </joint>
+  <link
+    name="rf_Link">
+    <inertial>
+      <origin
+        xyz="0 4.4409E-16 0.15004"
+        rpy="0 0 0" />
+      <mass
+        value="226.14" />
+      <inertia
+        ixx="16.397"
+        ixy="-1.525E-15"
+        ixz="-5.5945E-16"
+        iyy="16.397"
+        iyz="-8.3267E-17"
+        izz="29.404" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/rf_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/rf_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rf_joint"
+    type="continuous">
+    <origin
+      xyz="0 -1.05 0"
+      rpy="-1.5708 1.2309 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rf_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit effort="1000000000" velocity="10000" />
+  </joint>
+  <link
+    name="back_Link">
+    <inertial>
+      <origin
+        xyz="-0.98017 0 -0.044958"
+        rpy="0 0 0" />
+      <mass
+        value="920.36" />
+      <inertia
+        ixx="196.21"
+        ixy="6.8774E-16"
+        ixz="-0.034403"
+        iyy="184.06"
+        iyz="2.2927E-15"
+        izz="356.18" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/back_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/back_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="back_joint"
+    type="revolute">
+    <origin
+      xyz="-1.3 0 0.045"
+      rpy="0 0 0.0027246" />
+    <parent
+      link="base_link" />
+    <child
+      link="back_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-0.6"
+      upper="0.6"
+      effort="1000000000"
+      velocity="5" />
+  </joint>
+  <link
+    name="lb_Link">
+    <inertial>
+      <origin
+        xyz="0 -2.7756E-17 -0.15004"
+        rpy="0 0 0" />
+      <mass
+        value="226.14" />
+      <inertia
+        ixx="16.397"
+        ixy="0"
+        ixz="-6.3767E-17"
+        iyy="16.397"
+        iyz="1.6111E-16"
+        izz="29.404" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/lb_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/lb_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lb_joint"
+    type="continuous">
+    <origin
+      xyz="-1.3 1.05 -0.045"
+      rpy="1.5708 0.71272 -3.1416" />
+    <parent
+      link="back_Link" />
+    <child
+      link="lb_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit effort="1000000000" velocity="10000" />
+  </joint>
+  <link
+    name="rb_Link">
+    <inertial>
+      <origin
+        xyz="5.5511E-17 -4.1633E-17 0.15004"
+        rpy="0 0 0" />
+      <mass
+        value="226.14" />
+      <inertia
+        ixx="16.397"
+        ixy="1.3323E-15"
+        ixz="3.8723E-17"
+        iyy="16.397"
+        iyz="-3.7825E-17"
+        izz="29.404" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/rb_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://loader/meshes/rb_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rb_joint"
+    type="continuous">
+    <origin
+      xyz="-1.3 -1.05 -0.045"
+      rpy="1.5708 -0.35746 3.1416" />
+    <parent
+      link="back_Link" />
+    <child
+      link="rb_Link" />
+    <axis
+      xyz="0 0 1" />
+    <limit effort="1000000000" velocity="10000" />
+  </joint>
+
+    <!-- motors and transmissions for wheels -->
+  <transmission name="tran1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="lf_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>  
+
+  <transmission name="tran2">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rf_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor2">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>  
+
+    <transmission name="tran3">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="lb_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor3">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>  
+
+  <transmission name="tran4">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rb_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor4">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>  
+
+  <!-- EPS and transmissions for the steering -->
+  <transmission name="tran5">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="back_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor5">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+      <motorTorqueConstant>1000000</motorTorqueConstant>
+    </actuator>
+  </transmission>
+
+  <!-- Friction Parametres -->
+  <gazebo reference="lf_Link">
+    <mu1>10000000</mu1>
+    <mu2>10000000</mu2>
+    <kp>10000000</kp>
+    <kd>1</kd>
+  </gazebo>  
+
+  <gazebo reference="rf_Link">
+    <mu1>10000000</mu1>
+    <mu2>10000000</mu2>
+    <kp>10000000</kp>
+    <kd>1</kd>         
+  </gazebo>   
+
+  <gazebo reference="lb_Link">
+    <mu1>10000000</mu1>
+    <mu2>10000000</mu2>
+    <kp>10000000</kp>
+    <kd>1</kd>         
+  </gazebo> 
+
+  <gazebo reference="rb_Link">
+    <mu1>10000000</mu1>
+    <mu2>10000000</mu2>
+    <kp>10000000</kp>
+    <kd>1</kd>           
+  </gazebo>    
+
+  <!-- Gazebo Plugins -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/loader</robotNamespace>
+      <robotParam>robot_description</robotParam>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+      <jointName>lf_joint, rf_joint, lb_joint,rb_joint, back_joint</jointName>
+      <updateRate>50.0</updateRate>
+      <robotNamespace>/loader</robotNamespace>
+      <alwaysOn>true</alwaysOn>
+    </plugin>
+  </gazebo>
+</robot>

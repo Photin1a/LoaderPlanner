@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>matplotlib-cpp</name>
+  <version>1.0.0</version>
+  <description>The matplotlib-cpp package</description>
+
+  <maintainer email="2574195342@qq.com">yuanshuang</maintainer>
+
+  <license>BSD 3-Clause</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+
+</package>

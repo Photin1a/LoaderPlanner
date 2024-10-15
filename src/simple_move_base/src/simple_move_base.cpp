@@ -56,7 +56,8 @@ void SimpleMoveBase::PlanThreadFcn(){
 
 void SimpleMoveBase::CtlThreadFcn(){
     ros::Rate rate(ctl_rate_);
-    States result;
+    States3 result3;
+    States2 result;
     while(ros::ok()){
         if(true == ctl_permiss_ && !global_plan_->empty() && true == has_map_){
             std::unique_lock<std::mutex> lock(plan_mtx_);
@@ -73,7 +74,18 @@ void SimpleMoveBase::InitPoseCallback(const geometry_msgs::PoseWithCovarianceSta
     initpose_.header = initpose->header;
     initpose_.pose = initpose->pose.pose;
     has_initpose_=true;
-    ROS_INFO("SimpleMoveBase::InitPoseCallback");
+
+    // init transform
+    tf::Quaternion q;
+    auto  q_i = tf::createIdentityQuaternion();
+    q.setX(initpose->pose.pose.orientation.x);
+    q.setY(initpose->pose.pose.orientation.y);
+    q.setZ(initpose->pose.pose.orientation.z);
+    q.setW(initpose->pose.pose.orientation.w);
+    broadcaster_.sendTransform(
+    tf::StampedTransform(
+        tf::Transform(q, {initpose->pose.pose.position.x,initpose->pose.pose.position.y,initpose->pose.pose.position.z}),
+        ros::Time::now(),"map", "base_link"));    ROS_INFO("SimpleMoveBase::InitPoseCallback");
 }
 
 void SimpleMoveBase::EndPoseCallback(const geometry_msgs::PoseStampedConstPtr &endpose){

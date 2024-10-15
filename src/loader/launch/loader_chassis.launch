@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find loader)/launch/display.launch" />
+  <include file="$(find loader)/launch/gazebo.launch" />
+  <include file="$(find loader)/launch/control.launch" />
+
+</launch>

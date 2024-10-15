@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>matplotlib_ros</name>
+  <version>0.0.0</version>
+  <description>The matplotlib_ros package</description>
+  <maintainer email="photinia@todo.todo">photinia</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <export>
+  </export>
+</package>
