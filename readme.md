@@ -1,6 +1,6 @@
 # Loader Planner
-
-
+![](./resource/1.gif)
+![](./resource/2.gif)
 
 ## 1. Prerequisites
 ### 1.1 Ubuntu and ROS
