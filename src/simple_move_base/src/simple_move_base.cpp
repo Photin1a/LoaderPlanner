@@ -56,7 +56,7 @@ void SimpleMoveBase::PlanThreadFcn(){
 
 void SimpleMoveBase::CtlThreadFcn(){
     ros::Rate rate(ctl_rate_);
-    States result;
+    States2 result;
     while(ros::ok()){
         if(true == ctl_permiss_ && !global_plan_->empty() && true == has_map_){
             std::unique_lock<std::mutex> lock(plan_mtx_);

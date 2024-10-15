@@ -69,7 +69,24 @@ chmod 777 ./compile_commands.sh && ./compile_commands.sh
 >[hybrid A*](https://github.com/zm0612/Hybrid_A_Star)  
 >[decompROS](https://github.com/sikang/DecompROS.git)
 
-## Version
-### version-2
-使用e^x把走廊不等式约束变变为代价添加到代价函数中
-求解时间在20m在500ms左右，长距离50m可能在1~3s不等甚至更多。总体不会超过4s
+
+---
+# 更新日志
+## Version-1
+...
+## Version-2
+问题涉及到的约束有：  
+x,y,theta,gamma：`走廊约束`   
+gamma、omega、v、a、jerk的`边界约束`   
+dt时间的`正则约束`dt>0，必须严格大于0   
+### ~2024.5.13
+使用f=e^x把走廊（x,y）不等式约束变变为代价添加到代价函数中   
+求解时间在20m在500ms左右，长距离50m可能在1~3s不等甚至更多。总体不会超过4s   
+
+### 2024.5.15
+1) 将dt时间使用微分同胚映射到 (-inf,inf),从而消除`时间约束`  
+2) 走廊Ax < b,使用f=e^x障碍函数添加到代价中，消除`走廊约束`  
+3) gamma、omega、v、a、jerk,f=e^x障碍函数添加到代价中，消除`边界约束` 
+==>求解时间50m在1~2s，一般50m以下求解时间最多一秒。20m在100ms~300ms之间，如果要求比较复杂求解时间可能更长。   
+
+> 最后这是一个只有两点边界约束问题，IPOPT求解

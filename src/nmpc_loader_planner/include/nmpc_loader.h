@@ -26,6 +26,20 @@ struct States {
     jerk.clear();
   }
 };
+struct States2 {
+  std::vector<double> x, y, theta, v, gamma, a, omega, jerk, tau;
+  void Clear() {
+    x.clear();
+    y.clear();
+    v.clear();
+    a.clear();
+    tau.clear();
+    theta.clear();
+    gamma.clear();
+    omega.clear();
+    jerk.clear();
+  }
+};
 
 struct DecompConstraints {
   double start_x, start_y, start_theta, start_v = 0, start_gamma = 0,
@@ -41,15 +55,15 @@ class Nmpc{
 public:
   Nmpc(nav_msgs::OccupancyGrid *costmap);
   ~Nmpc();
-  double Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States &result);
+  double Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States2 &result);
 
 private:
   void BuildNLP(std::vector<geometry_msgs::PoseStamped> &init_poses);
   std::vector<LinearConstraint2D>& BuildConstraints(std::vector<geometry_msgs::PoseStamped> &guess_poses);
   void Map2Vec2D(nav_msgs::OccupancyGrid &costmap, vec_Vec2f &vec_map);
   void Poses2Vec2D(std::vector<geometry_msgs::PoseStamped> &init_poses, vec_Vec2f &vec2D_path);
-  void GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States &vec_guess);
-  void PublishPath(States &result);
+  void GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States2 &vec_guess);
+  void PublishPath(States2 &result);
 
   nav_msgs::OccupancyGrid *costmap_;
   casadi::Dict nlp_config_;
