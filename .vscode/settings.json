@@ -71,8 +71,7 @@
         "future": "cpp",
         "regex": "cpp",
         "eigenvalues": "cpp",
-        "core": "cpp",
-        "*.ipp": "cpp"
+        "core": "cpp"
     },
     "python.autoComplete.extraPaths": [
         "/home/photinia/Documents/loader_ws/devel/lib/python3/dist-packages",

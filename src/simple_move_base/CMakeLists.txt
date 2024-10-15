@@ -1,14 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(simple_move_base)
-
-set(ENABLE_DEBUG ON)  #开启debug
-if(ENABLE_DEBUG)
-  set(CMAKE_BUILD_TYPE Debug)
-else()
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
-
+# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 find_package(catkin REQUIRED
@@ -18,7 +11,6 @@ find_package(catkin REQUIRED
         roscpp
         rospy
         tf2_ros
-        tf2
         hybrid_a_star
         nmpc_loader_planner
         decomp_util
@@ -41,7 +33,6 @@ catkin_package(
         nav_msgs
         roscpp
         tf2_ros
-        tf2
         hybrid_a_star
         nmpc_loader_planner
 )

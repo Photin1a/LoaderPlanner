@@ -1,6 +1,5 @@
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
-#include <tf2/convert.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <string>
 #include <thread>
@@ -8,7 +7,7 @@
 #include <vector>
 #include <condition_variable>
 #include <hybrid_a_star/hybrid_a_star_flow.h>
-#include "nmpc_loader_ipopt.h"
+#include "nmpc_loader.h"
 
 enum PlanSta{
     NONE,
@@ -23,8 +22,6 @@ public:
 private:
     tf2_ros::Buffer &buffer_;
     nav_msgs::OccupancyGrid costmap_;
-
-    tf::TransformBroadcaster broadcaster_;
 
     bool has_initpose_,has_endpose_,has_map_;
     ros::Subscriber initpose_sub_, endpose_sub_, map_sub_;

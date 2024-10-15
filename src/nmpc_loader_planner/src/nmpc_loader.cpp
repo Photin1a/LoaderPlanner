@@ -1,10 +1,9 @@
-#include "nmpc_loader_ipopt.h"
+#include "nmpc_loader.h"
 
 Nmpc::Nmpc(nav_msgs::OccupancyGrid *costmap):costmap_(costmap){
     ros::NodeHandle public_nh;
     local_path_pub_ = public_nh.advertise<nav_msgs::Path>("local_path",1);
     corridor_pub_ = public_nh.advertise<decomp_ros_msgs::PolyhedronArray>("corridor",1);
-    gamma_pub_ = public_nh.advertise<sensor_msgs::JointState>("/joint_states",1); 
     nlp_config_ = {{"ipopt", casadi::Dict({
                                {"linear_solver", "mumps"},
                                {"print_level", 1},
@@ -30,10 +29,7 @@ void Nmpc::BuildNLP(std::vector<geometry_msgs::PoseStamped> &init_poses){
     casadi::SX jerk = casadi::SX::sym("jerk", params_.N_-1);
 
     //Time  Variables
-    // casadi::SX dt = casadi::SX::sym("dt", params_.N_-1);
-    casadi::SX dt(params_.N_-1,1);
-    casadi::SX tau = casadi::SX::sym("tau", params_.N_-1);  //同胚正变换
-    dt = if_else(tau>0,0.5*tau*tau+tau+1,2/(tau*tau-2*tau+2));
+    casadi::SX dt = casadi::SX::sym("dt", params_.N_-1);
 
     //Corridor Constraints
     std::vector<std::pair<casadi::SX,casadi::SX>> corners; //A.B.C...H    TODO BUG
@@ -55,20 +51,17 @@ void Nmpc::BuildNLP(std::vector<geometry_msgs::PoseStamped> &init_poses){
             for (int col = 0; col < 2;col++) A(row, col) = cs.A_(row, col);
         casadi::SX b_t(cs.b_.rows(),1);
         for(int i=0;i<cs.b_.rows();i++)b_t(i) = cs.b_(i);
-            for(auto &corner:corners){
-                Ap.emplace_back(mtimes(A,casadi::SX::vertcat({corner.first(idx),corner.second(idx)})));
-                b.emplace_back(b_t);
-            }
+        for(auto &corner:corners){
+            Ap.emplace_back(mtimes(A,casadi::SX::vertcat({corner.first(idx),corner.second(idx)})));
+            b.emplace_back(b_t);
+        }
         idx++;
     }
     auto g = casadi::SX::vertcat(Ap)-casadi::SX::vertcat(b);
     cs_rows_ = g.size().first;
     cs_cols_ = g.size().second;
-    double opti_w_corr = 100;  //TODO
 
-    // TWO points Bound constraints
-    auto end = params_.N_ - 1;
-    auto g_two_point = casadi::SX::vertcat({x(0),y(0),theta(0),v(0),gamma(0),a(0),x(end),y(end),theta(end),v(end),gamma(end),a(end)});
+    double opti_w_corr = 100;  //TODO
 
     // Kinematic Cost
     auto prev = casadi::Slice(0, params_.N_ - 1);
@@ -81,37 +74,17 @@ void Nmpc::BuildNLP(std::vector<geometry_msgs::PoseStamped> &init_poses){
     auto g_gamma = gamma(next) - (gamma(prev) + dt(prev) * omega(prev));
     auto kinematic_cost = params_.opti_w_kin_ * sumsqr(casadi::SX::vertcat({g_x, g_y, g_theta, g_v, g_a, g_gamma}));
 
-    // Time Cost、 Input Cost、Corridor Cost、Bound Cost、Total Cost
-    double opti_w_bound = 50;
+    // Time Cost、 Input Cost、Corridor Cost、Total Cost
     auto time_cost = params_.opti_w_time_ * sumsqr(casadi::SX::vertcat({dt}));
     auto input_cost = params_.opti_w_uj_ * sumsqr(jerk) + params_.opti_w_uw_ * sumsqr(omega);
     auto corridor_cost = opti_w_corr*sumsqr(exp(5*g));  //TODO
-    auto bound_cost = opti_w_bound*sumsqr(exp(5*casadi::SX::vertcat({params_.min_velocity_-v,v-params_.max_velocity_,
-    params_.min_gamma_-gamma,gamma-params_.max_gamma_,
-    params_.min_acceleration_-a,a-params_.max_acceleration_,
-    params_.min_omega_-omega,omega-params_.max_omega_,
-    params_.min_jerk_-jerk,jerk-params_.max_jerk_})));
 
     auto f_obj = kinematic_cost + input_cost + time_cost + corridor_cost;
 
-    casadi::SX opti_x = casadi::SX::vertcat({x, y, theta, v, gamma, a, omega, jerk, tau});
-    casadi::SXDict nlp = {{"x", opti_x}, {"f", f_obj}, {"g",g_two_point}};
+    casadi::SX opti_x = casadi::SX::vertcat({x, y, theta, v, gamma, a, omega, jerk, dt});
+    casadi::SXDict nlp = {{"x", opti_x}, {"f", f_obj}};
     solver_ = nlpsol("solver", "ipopt", nlp, nlp_config_);
     cost_evaluator_ = casadi::Function("inf", {opti_x}, {kinematic_cost}, {});
-}
-
-template <int Dim>
-decomp_ros_msgs::PolyhedronArray polyhedron_array_to_ros(const vec_E<Polyhedron<Dim>>& vs, int delta = 0){
-  decomp_ros_msgs::PolyhedronArray msg;
-  int i = 0;
-  for (const auto &v : vs){
-    if(i == delta){
-        msg.polyhedrons.push_back(DecompROS::polyhedron_to_ros(v)); 
-        i = -1;   
-    }
-    i++;
-  }
-  return msg;
 }
 
 std::vector<LinearConstraint2D>& Nmpc::BuildConstraints(std::vector<geometry_msgs::PoseStamped> &init_poses){
@@ -131,12 +104,11 @@ std::vector<LinearConstraint2D>& Nmpc::BuildConstraints(std::vector<geometry_msg
     const auto pt_inside = (vec_path[i] + vec_path[i+1]) / 2;
     decomp_cs_.emplace_back(pt_inside, polys[i].hyperplanes());
   }
-  decomp_ros_msgs::PolyhedronArray poly_msg = polyhedron_array_to_ros(polys, 6);
+  decomp_ros_msgs::PolyhedronArray poly_msg = DecompROS::polyhedron_array_to_ros(polys);
   poly_msg.header.frame_id = "world";
   corridor_pub_.publish(poly_msg); 
   return decomp_cs_;
 }
-
 
 void Nmpc::Map2Vec2D(nav_msgs::OccupancyGrid &costmap, vec_Vec2f &vec_map){
     vec_map.clear();
@@ -161,7 +133,7 @@ void Nmpc::Poses2Vec2D(std::vector<geometry_msgs::PoseStamped> &init_poses, vec_
     }
 }
 
-void Nmpc::GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States2 &vec_guess){
+void Nmpc::GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States &vec_guess){
     vec_guess.Clear();
     vec_guess.x.emplace_back(init_poses.front().pose.position.x);  //point: 0
     vec_guess.y.emplace_back(init_poses.front().pose.position.y);
@@ -180,50 +152,77 @@ void Nmpc::GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States2
         vec_guess.a.emplace_back(0);
         vec_guess.theta.emplace_back(tf::getYaw(init_poses[i].pose.orientation));
         vec_guess.gamma.emplace_back(0);  //TODO
+
         vec_guess.omega.emplace_back(0); //TODO
-        vec_guess.jerk.emplace_back(0); 
-        auto dt =  dist/v;
-        double tau,tau1,tau2;
-        if(dt>1){
-            tau1=1+std::sqrt(2*dt-1);
-            tau2=1-std::sqrt(2*dt-1);
-            tau = tau1>0?tau1:tau2;
-        }
-        else {
-            tau1=1+std::sqrt(2*dt-dt*dt)/dt;
-            tau2=1-std::sqrt(2*dt-dt*dt)/dt;
-            tau = tau1<=0?tau1:tau2;
-        }
-        vec_guess.tau.emplace_back(tau);
+        vec_guess.jerk.emplace_back(0);  
+        vec_guess.dt.emplace_back(dist/v);
     }
     vec_guess.v.back() = 0;  // [point: N-1
 }
 
-double Nmpc::Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States2 &result){
+double Nmpc::Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States &result){
   BuildNLP(init_poses);
   // Guess
   casadi::DMDict arg, res;
-  States2 guess;
+  States guess;
   GetGuess(init_poses, guess);
-  arg["x0"] = casadi::DM::vertcat({guess.x, guess.y, guess.theta, guess.v, guess.gamma, guess.a, guess.omega, guess.jerk, guess.tau});
+  arg["x0"] = casadi::DM::vertcat({guess.x, guess.y, guess.theta, guess.v, guess.gamma, guess.a, guess.omega, guess.jerk, guess.dt});
+
+  // State 
+  auto identity = casadi::DM::ones(params_.N_, 1);
+  auto identity_ut = casadi::DM::ones(params_.N_-1, 1);
+  casadi::DM lb_x, lb_y, lb_theta, lb_v, lb_gamma, lb_a;
+  casadi::DM ub_x, ub_y, ub_theta, ub_v, ub_gamma, ub_a;
+  lb_x = -casadi::inf * identity;
+  ub_x = casadi::inf * identity;
+  lb_y = -casadi::inf * identity;
+  ub_y = casadi::inf * identity;
+  lb_theta = -casadi::inf * identity;
+  ub_theta = casadi::inf * identity;
+  lb_v = params_.min_velocity_ * identity;
+  ub_v = params_.max_velocity_ * identity;
+  lb_a = params_.min_acceleration_ * identity;
+  ub_a = params_.max_acceleration_ * identity;
+  lb_gamma = params_.min_gamma_ * identity;
+  ub_gamma = params_.max_gamma_ * identity;
+
+  // Input 
+  casadi::DM lb_omega, lb_jerk;
+  casadi::DM ub_omega, ub_jerk;
+  lb_omega = params_.min_omega_ * identity_ut;
+  ub_omega = params_.max_omega_ * identity_ut;
+  lb_jerk = params_.min_jerk_ * identity_ut;
+  ub_jerk = params_.max_jerk_ * identity_ut;
+
+  //Time 
+  casadi::DM lb_dt;
+  casadi::DM ub_dt;
+  lb_dt = 0.0 * identity_ut;
+  ub_dt = casadi::inf * identity_ut;
 
   // Two-point boundary value of constraints
-  casadi::DM lb_two_point(12, 1),ub_two_point(12, 1);
-  ub_two_point(0) = lb_two_point(0) = init_poses.front().pose.position.x;
-  ub_two_point(1) = lb_two_point(1) = init_poses.front().pose.position.y;
-  ub_two_point(2) = lb_two_point(2) = tf::getYaw(init_poses.front().pose.orientation);
-  ub_two_point(3) = lb_two_point(3) = 0;
-  ub_two_point(4) = lb_two_point(4) = 0;
-  ub_two_point(5) = lb_two_point(5) = 0;
-  ub_two_point(6) = lb_two_point(6) = init_poses.back().pose.position.x;
-  ub_two_point(7) = lb_two_point(7) = init_poses.back().pose.position.y;
-  ub_two_point(8) = lb_two_point(8) = tf::getYaw(init_poses.back().pose.orientation);
-  ub_two_point(9) = lb_two_point(9) = 0;
-  ub_two_point(10) = lb_two_point(10) = 0;
-  ub_two_point(11) = lb_two_point(11) = 0;
+  int end = params_.N_ - 1;
+  lb_x(0) = ub_x(0) = init_poses.front().pose.position.x;
+  lb_y(0) = ub_y(0) = init_poses.front().pose.position.y;
+  lb_theta(0) = ub_theta(0) = tf::getYaw(init_poses.front().pose.orientation);
+  lb_v(0) = ub_v(0) = 0;
+  lb_gamma(0) = ub_gamma(0) = 0;
+  lb_a(0) = ub_a(0) = 0;
+  lb_x(end) = ub_x(end) = init_poses.back().pose.position.x;
+  lb_y(end) = ub_y(end) = init_poses.back().pose.position.y;
+  lb_theta(end) = ub_theta(end) = tf::getYaw(init_poses.back().pose.orientation);
+  lb_v(end) = ub_v(end) = 0;
+  lb_gamma(end) = ub_gamma(end) = 0;
+  lb_a(end) = ub_a(end) = 0;
 
-  arg["lbg"] = lb_two_point;
-  arg["ubg"] = ub_two_point;
+  // Optim Variables Boundary constraint, contains State and Input constraint.
+  arg["lbx"] = casadi::DM::vertcat({lb_x, lb_y, lb_theta, lb_v, lb_gamma, lb_a, lb_omega, lb_jerk, lb_dt});
+  arg["ubx"] = casadi::DM::vertcat({ub_x, ub_y, ub_theta, ub_v, ub_gamma, ub_a, ub_omega, ub_jerk, ub_dt});
+
+  // Corridor boundary constraints
+//   auto identity_Ap_b = casadi::DM::ones(cs_rows_, 1);
+//   arg["lbg"] = -casadi::inf * identity_Ap_b;
+//   arg["ubg"] = 0. * identity_Ap_b;
 
   // solve
   res = solver_(arg);
@@ -237,7 +236,7 @@ double Nmpc::Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States2 &
   result.a.resize(params_.N_);
   result.omega.resize(params_.N_-1);
   result.jerk.resize(params_.N_-1);
-  result.tau.resize(params_.N_-1);
+  result.dt.resize(params_.N_-1);
   for (size_t i = 0; i < params_.N_; i++) {
     result.x[i] = double(opt(i, 0));
     result.y[i] = double(opt(params_.N_+ i, 0));
@@ -249,10 +248,9 @@ double Nmpc::Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States2 &
   for (size_t i = 0; i < params_.N_-1; i++) {
     result.omega[i] = double(opt(6 * (params_.N_ - 1) + i, 0));
     result.jerk[i] = double(opt(7 * (params_.N_ - 1) + i, 0));
-    result.tau[i] = double(opt(8 *  (params_.N_ -1) + i, 0));
+    result.dt[i] = double(opt(8 *  (params_.N_ -1) + i, 0));
   }
 
-  ROS_INFO("[Nmpc::Solve]Get solution successfully");
   PublishPath(result);
   
   // evaluate infeasibility cost
@@ -262,7 +260,7 @@ double Nmpc::Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States2 &
 }
 
 #include <fstream>
-void Nmpc::PublishPath(States2 &result){
+void Nmpc::PublishPath(States &result){
     nav_msgs::Path path;
     geometry_msgs::PoseStamped pose_stamped;
     for (int i = 0;i<result.x.size();i++) {
@@ -274,41 +272,58 @@ void Nmpc::PublishPath(States2 &result){
         path.poses.emplace_back(pose_stamped);
     }
     path.header.stamp = ros::Time::now();
-    path.header.frame_id = "map";
+    path.header.frame_id = "world";
     local_path_pub_.publish(path);
 
-    // static transform
-    static tf::TransformBroadcaster broadcaster;
-    sensor_msgs::JointState gamma;
-    gamma.name = {"back_joint","lf_joint","rf_joint","lb_joint","rb_joint"};
-    int end = result.x.size()-1;
-    for(int i = 0;i < end;i++){
-        double dtau = result.tau.at(i);
-        double dt = casadi::if_else(dtau>0,0.5*dtau*dtau+dtau+1,2/(dtau*dtau-2*dtau+2));
-        if(dt > 0){
-            broadcaster.sendTransform(
-                tf::StampedTransform(
-                    tf::Transform(tf::createQuaternionFromYaw(result.theta.at(i)), tf::Vector3(result.x.at(i),result.y.at(i),0)),
-                    ros::Time::now(),"map", "base_link"));
-
-            gamma.header.stamp = ros::Time::now();
-            gamma.position = {-result.gamma.at(i),0,0,0,0};
-            gamma.velocity = {result.omega.at(i),0,0,0,0};
-            gamma.effort = {0,0,0,0,0};
-            gamma_pub_.publish(gamma);
-            ros::Rate(1/dt).sleep();
-            ROS_INFO("[Nmpc::PublishPath]Move to %d/%d pos.",i+1,end+1);
-        }
-    }
-    broadcaster.sendTransform(
-    tf::StampedTransform(
-        tf::Transform(tf::createQuaternionFromYaw(result.theta.at(end)), tf::Vector3(result.x.at(end),result.y.at(end),0)),
-        ros::Time::now(),"map", "base_link"));
-    gamma.header.stamp = ros::Time::now();
-    gamma.position = {-result.gamma.at(end),0,0,0,0};
-    gamma.velocity = {0,0,0,0,0};
-    gamma.effort = {0,0,0,0,0};
-    gamma_pub_.publish(gamma);
-    ROS_INFO("[Nmpc::PublishPath]Move to %d/%d pos.",end+1,end+1);
-
+    // //print result x y theta v a gamma jerk omega dt
+    // std::ofstream result_txt;
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/x.txt",std::ios::out);
+    // if(!result_txt.is_open()){
+    //     ROS_WARN("[Nmpc::PublishPath]:result_txt open failed!");
+    // }
+    // for (int i = 0;i<result.x.size();i++) {
+    //     result_txt<<result.x[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/y.txt",std::ios::out);
+    // for (int i = 0;i<result.y.size();i++) {
+    //     result_txt<<result.y[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/theta.txt",std::ios::out);
+    // for (int i = 0;i<result.theta.size();i++) {
+    //     result_txt<<result.theta[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/v.txt",std::ios::out);
+    // for (int i = 0;i<result.v.size();i++) {
+    //     result_txt<<result.v[i]<<"\n";
+    // }  
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/a.txt",std::ios::out);
+    // for (int i = 0;i<result.a.size();i++) {
+    //     result_txt<<result.a[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/gamma.txt",std::ios::out);
+    // for (int i = 0;i<result.gamma.size();i++) {
+    //     result_txt<<result.gamma[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/jerk.txt",std::ios::out);
+    // for (int i = 0;i<result.jerk.size();i++) {
+    //     result_txt<<result.jerk[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/omega.txt",std::ios::out);
+    // for (int i = 0;i<result.omega.size();i++) {
+    //     result_txt<<result.omega[i]<<"\n";  
+    // }
+    // result_txt.close();
+    // result_txt.open("/home/photinia/Documents/LoaderPlanner/src/simple_move_base/config/dt.txt",std::ios::out);
+    // for (int i = 0;i<result.dt.size();i++) {
+    //     result_txt<<result.dt[i]<<"\n";  
+    // }
+    // result_txt.close();
 }
+

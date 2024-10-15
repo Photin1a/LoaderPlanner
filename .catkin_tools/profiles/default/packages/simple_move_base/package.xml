@@ -23,7 +23,6 @@
     <depend>roscpp</depend>
     <depend>rospy</depend>
     <depend>tf2_ros</depend>
-    <depend>tf2</depend>
     <depend>nmpc_loader_planner</depend>
     <depend>hybrid_a_star</depend>
     <depend>decomp_util</depend>  

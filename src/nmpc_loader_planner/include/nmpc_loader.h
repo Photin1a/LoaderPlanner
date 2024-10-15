@@ -1,7 +1,3 @@
-#ifndef NMPC_LOADER_LBFGS_H
-#ifndef NMPC_LOADER_IPOPT_H
-#define NMPC_LOADER_IPOPT_H
-
 #include<vector>
 #include <ros/ros.h>
 #include <casadi/casadi.hpp>
@@ -15,9 +11,6 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
 #include <tf/tf.h>
-#include <tf/transform_broadcaster.h>
-#include <algorithm>
-#include <sensor_msgs/JointState.h>
 
 struct States {
   std::vector<double> x, y, theta, v, gamma, a, omega, jerk, dt;
@@ -32,60 +25,6 @@ struct States {
     omega.clear();
     jerk.clear();
   }
-};
-struct States2 {
-  std::vector<double> x, y, theta, v, gamma, a, omega, jerk, tau;
-  void Clear() {
-    x.clear();
-    y.clear();
-    v.clear();
-    a.clear();
-    tau.clear();
-    theta.clear();
-    gamma.clear();
-    omega.clear();
-    jerk.clear();
-  }
-};
-
-
-struct States3 {
-  Eigen::VectorXd xut;
-  int N_;
-
-  Eigen::Map<Eigen::VectorXd> x(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data(),N_-2);
-  }
-    Eigen::Map<Eigen::VectorXd> y(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+N_-2,N_-2);
-  }
-    Eigen::Map<Eigen::VectorXd> theta(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+2*(N_-2),N_-2);
-  }
-    Eigen::Map<Eigen::VectorXd> gamma(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+3*(N_-2),N_-2);
-  }
-    Eigen::Map<Eigen::VectorXd> v(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+4*(N_-2),N_-2);
-  }
-    Eigen::Map<Eigen::VectorXd> a(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+5*(N_-2),N_-2);
-  }
-    Eigen::Map<Eigen::VectorXd> omega(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+6*(N_-2),N_-1);
-  }
-    Eigen::Map<Eigen::VectorXd> jerk(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+6*(N_-2)+N_-1,N_-1);
-  }
-    Eigen::Map<Eigen::VectorXd> tau(){
-    return Eigen::Map<Eigen::VectorXd>(xut.data()+6*(N_-2)+2*(N_-1),N_-1);
-  }
-
-  //default N=3
-  States3():N_(3),xut(12){}
-
-  // N >=3
-  States3(int N):N_(N),xut(9*N-15){}
 };
 
 struct DecompConstraints {
@@ -102,15 +41,15 @@ class Nmpc{
 public:
   Nmpc(nav_msgs::OccupancyGrid *costmap);
   ~Nmpc();
-  double Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States2 &result);
+  double Solve(std::vector<geometry_msgs::PoseStamped> &init_poses,States &result);
 
 private:
   void BuildNLP(std::vector<geometry_msgs::PoseStamped> &init_poses);
   std::vector<LinearConstraint2D>& BuildConstraints(std::vector<geometry_msgs::PoseStamped> &guess_poses);
   void Map2Vec2D(nav_msgs::OccupancyGrid &costmap, vec_Vec2f &vec_map);
   void Poses2Vec2D(std::vector<geometry_msgs::PoseStamped> &init_poses, vec_Vec2f &vec2D_path);
-  void GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States2 &vec_guess);
-  void PublishPath(States2 &result);
+  void GetGuess(std::vector<geometry_msgs::PoseStamped> &init_poses, States &vec_guess);
+  void PublishPath(States &result);
 
   nav_msgs::OccupancyGrid *costmap_;
   casadi::Dict nlp_config_;
@@ -131,8 +70,4 @@ private:
 
   ros::Publisher local_path_pub_;
   ros::Publisher corridor_pub_;
-  ros::Publisher gamma_pub_;
 };
-
-#endif
-#endif

@@ -1,5 +1,0 @@
-loader
-/home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/.private/loader/cmake.lock /home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/./cmake.lock
-/home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/.private/loader/lib/pkgconfig/loader.pc /home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/lib/pkgconfig/loader.pc
-/home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/.private/loader/share/loader/cmake/loaderConfig.cmake /home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/share/loader/cmake/loaderConfig.cmake
-/home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/.private/loader/share/loader/cmake/loaderConfig-version.cmake /home/photinia/Downloads/LoaderPlanner/LoaderPlanner-dev/devel/share/loader/cmake/loaderConfig-version.cmake

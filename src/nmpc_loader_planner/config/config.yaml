@@ -7,8 +7,8 @@ nmpc_loader_planner:
     opti_w_time: 1
 
   corridor:
-    max_a_axis: 5
-    max_b_axis: 5
+    max_a_axis: 20
+    max_b_axis: 20
     use_decomp_corridor: false
     is_sparsity: false
     sparsity_rate: 0.5
